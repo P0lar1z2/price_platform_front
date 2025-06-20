@@ -31,5 +31,5 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
           source: "dist/**"
-          target: "/opt/1panel/www/sites/edfgaad.xyz/index"
+          target: "/opt/1panel/www/sites/www.edfgaad.xyz/index"
           strip_components: 1
