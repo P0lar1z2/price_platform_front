@@ -29,6 +29,6 @@ jobs:
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
-          password: ${{ secrets.DEPLOY_PASS }}
+          key: ${{ secrets.DEPLOY_KEY }}
           source: "dist/*"
-          target: "/your/target/path"
+          target: "/opt/1panel/www/sites/edfgaad.xyz/index"
