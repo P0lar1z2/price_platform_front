@@ -3,7 +3,7 @@ import axios from "axios";
 const api = axios.create({
   baseURL:
     process.env.NODE_ENV === "production"
-      ? "https://api.example.com"
+      ? "https://www.edfgaad.xyz"
       : "http://localhost:8001", // 替换为您的后端API地址
   timeout: 50000,
 });
