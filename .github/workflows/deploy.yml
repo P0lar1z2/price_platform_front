@@ -30,5 +30,6 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
-          source: "dist/*"
+          source: "dist/**"
           target: "/opt/1panel/www/sites/edfgaad.xyz/index"
+          strip_components: 1
