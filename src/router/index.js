@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../views/Login.vue";
+import { getUserInfo } from "../api/api.js";
 
 const routes = [
   {
@@ -26,17 +27,31 @@ const router = createRouter({
   routes,
 });
 
+let isAuth = null;
 // 路由守卫
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem("token");
-
-  if (to.meta.requiresAuth && !token) {
-    next("/login");
-  } else if (to.path === "/login" && token) {
-    next("/");
-  } else {
-    next();
+router.beforeEach(async (to, from, next) => {
+  if (to.path === "/login") {
+    return next();
   }
+
+  if (to.meta.requiresAuth) {
+    if (isAuth === null) {
+      try {
+        await getUserInfo();
+        isAuth = true;
+      } catch (e) {
+        isAuth = false;
+      }
+    }
+
+    if (isAuth) {
+      return next();
+    } else {
+      return next("/login");
+    }
+  }
+
+  return next();
 });
 
 export default router;
