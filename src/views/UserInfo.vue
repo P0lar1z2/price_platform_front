@@ -4,9 +4,13 @@
     <div v-if="loading">加载中...</div>
     <div v-else-if="error">{{ error }}</div>
     <div v-else class="info-container">
-      <div v-for="(value, key) in userInfo" :key="key" class="info-item">
-        <span class="label">{{ key }}:</span>
-        <span class="value">{{ value }}</span>
+      <div class="info-item">
+        <span class="label">已绑定终端:</span>
+        <span class="value">{{ userInfo && userInfo.is_bound ? '是' : '否' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">终端在线:</span>
+        <span class="value">{{ userInfo && userInfo.is_online ? '是' : '否' }}</span>
       </div>
       <div class="info-item">
         <span class="label">携程绑定:</span>
