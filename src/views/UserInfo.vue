@@ -26,73 +26,11 @@
         </span>
       </div>
     </div>
-
-    <!-- 配对管理 -->
-    <div class="pairs-container">
-      <h3>配对管理</h3>
-      <div class="pairs-actions">
-        <v-text-field
-          v-model="newPair.ctrip_id_1"
-          label="携程ID 1"
-          density="compact"
-          class="input-field"
-        ></v-text-field>
-        <v-text-field
-          v-model="newPair.ctrip_id_2"
-          label="携程ID 2"
-          density="compact"
-          class="input-field"
-        ></v-text-field>
-        <v-btn color="primary" @click="handleAddPair" :loading="addingPair">
-          添加配对
-        </v-btn>
-      </div>
-      <v-table>
-        <thead>
-          <tr>
-            <th>创建用户</th>
-            <th>携程ID 1</th>
-            <th>携程ID 2</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="loadingPairs">
-            <td colspan="4" class="text-center">加载中...</td>
-          </tr>
-          <tr v-else-if="pairs.length === 0">
-            <td colspan="4" class="text-center">暂无数据</td>
-          </tr>
-          <tr v-else v-for="pair in pairs" :key="pair.ctrip_id_1 + pair.ctrip_id_2">
-            <td>{{ pair.user }}</td>
-            <td>{{ pair.ctrip_id_1 }}</td>
-            <td>{{ pair.ctrip_id_2 }}</td>
-            <td>
-              <v-btn
-                color="error"
-                size="small"
-                variant="text"
-                @click="handleDeletePair(pair)"
-                :loading="deletingPair === pair.ctrip_id_1 + pair.ctrip_id_2"
-              >
-                删除
-              </v-btn>
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
-    </div>
-
     <!-- 个人配对管理 -->
     <div class="pairs-container">
       <h3>个人配对管理</h3>
       <div class="pairs-actions">
-        <v-text-field
-          v-model="newMyPair.ctrip_id"
-          label="携程ID"
-          density="compact"
-          class="input-field"
-        ></v-text-field>
+        <v-text-field v-model="newMyPair.ctrip_id" label="携程ID" density="compact" class="input-field"></v-text-field>
         <v-btn color="primary" @click="handleAddMyPair" :loading="addingMyPair">
           添加个人配对
         </v-btn>
@@ -114,13 +52,8 @@
           <tr v-else v-for="pair in myPairs" :key="pair.ctrip_id">
             <td>{{ pair.ctrip_id }}</td>
             <td>
-              <v-btn
-                color="error"
-                size="small"
-                variant="text"
-                @click="handleDeleteMyPair(pair)"
-                :loading="deletingMyPair === pair.ctrip_id"
-              >
+              <v-btn color="error" size="small" variant="text" @click="handleDeleteMyPair(pair)"
+                :loading="deletingMyPair === pair.ctrip_id">
                 删除
               </v-btn>
             </td>
@@ -128,6 +61,46 @@
         </tbody>
       </v-table>
     </div>
+    <!-- 配对管理 -->
+    <div class="pairs-container">
+      <h3>配对管理</h3>
+      <div class="pairs-actions">
+        <v-text-field v-model="newPair.ctrip_id_1" label="携程ID 1" density="compact" class="input-field"></v-text-field>
+        <v-text-field v-model="newPair.ctrip_id_2" label="携程ID 2" density="compact" class="input-field"></v-text-field>
+        <v-btn color="primary" @click="handleAddPair" :loading="addingPair">
+          添加配对
+        </v-btn>
+      </div>
+      <v-table>
+        <thead>
+          <tr>
+            <th>携程ID 1</th>
+            <th>携程ID 2</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="loadingPairs">
+            <td colspan="3" class="text-center">加载中...</td>
+          </tr>
+          <tr v-else-if="pairs.length === 0">
+            <td colspan="3" class="text-center">暂无数据</td>
+          </tr>
+          <tr v-else v-for="pair in pairs" :key="pair.ctrip_id_1 + pair.ctrip_id_2">
+            <td>{{ pair.ctrip_id_1 }}</td>
+            <td>{{ pair.ctrip_id_2 }}</td>
+            <td>
+              <v-btn color="error" size="small" variant="text" @click="handleDeletePair(pair)"
+                :loading="deletingPair === pair.ctrip_id_1 + pair.ctrip_id_2">
+                删除
+              </v-btn>
+            </td>
+          </tr>
+        </tbody>
+      </v-table>
+    </div>
+
+
 
     <!-- 二维码弹窗 -->
     <div v-if="showQrcode" class="qrcode-modal">
@@ -146,9 +119,9 @@
 </template>
 
 <script>
-import { 
-  getUserInfo, 
-  getCtripState, 
+import {
+  getUserInfo,
+  getCtripState,
   getCtripQrcode,
   addPair,
   getPairs,
@@ -381,13 +354,17 @@ export default {
 
 .qrcode-modal {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.3);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
+
 .qrcode-content {
   background: #fff;
   padding: 30px 40px;
@@ -395,16 +372,19 @@ export default {
   text-align: center;
   min-width: 300px;
 }
+
 .qrcode-img {
   width: 200px;
   height: 200px;
   margin: 20px 0;
 }
+
 .qrcode-actions {
   display: flex;
   justify-content: center;
   gap: 20px;
 }
+
 .qrcode-actions button {
   padding: 6px 18px;
   border: none;
@@ -456,4 +436,4 @@ export default {
 .text-center {
   text-align: center;
 }
-</style> 
+</style>
