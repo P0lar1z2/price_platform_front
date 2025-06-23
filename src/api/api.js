@@ -51,3 +51,29 @@ export const getCtripState = () => {
 export const getCtripQrcode = () => {
   return api.get('/api/ctrip/qrcode', { responseType: 'arraybuffer' });
 };
+
+// 配对管理接口
+export const addPair = (data) => {
+  return api.post('/api/pair', data);
+};
+
+export const getPairs = () => {
+  return api.get('/api/pair');
+};
+
+export const deletePair = (data) => {
+  return api.delete('/api/pair', { data });
+};
+
+// 个人配对管理接口
+export const addMyPair = (data) => {
+  return api.post('/api/pair/my', data);
+};
+
+export const getMyPairs = () => {
+  return api.get('/api/pair/my');
+};
+
+export const deleteMyPair = (data) => {
+  return api.delete('/api/pair/my', { data });
+};
