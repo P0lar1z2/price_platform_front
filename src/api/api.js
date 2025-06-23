@@ -6,15 +6,12 @@ const api = axios.create({
       ? "https://www.edfgaad.xyz"
       : "http://localhost:8001", // 替换为您的后端API地址
   timeout: 50000,
+  withCredentials: true,
 });
 
 // 请求拦截器
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     return config;
   },
   (error) => {
@@ -27,7 +24,6 @@ api.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
       if (window.location.pathname !== '/login') {
         window.location.href = "/login";
       }

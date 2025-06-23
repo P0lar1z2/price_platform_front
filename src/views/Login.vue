@@ -18,7 +18,6 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value
     })
-    localStorage.setItem('token', response.token)
     router.push('/')
   } catch (err) {
     error.value = err.response?.status === 401 ? "错误的用户名或密码" : "登陆失败"
