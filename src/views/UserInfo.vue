@@ -50,6 +50,7 @@
       <v-table>
         <thead>
           <tr>
+            <th>创建用户</th>
             <th>携程ID 1</th>
             <th>携程ID 2</th>
             <th>操作</th>
@@ -57,12 +58,13 @@
         </thead>
         <tbody>
           <tr v-if="loadingPairs">
-            <td colspan="3" class="text-center">加载中...</td>
+            <td colspan="4" class="text-center">加载中...</td>
           </tr>
           <tr v-else-if="pairs.length === 0">
-            <td colspan="3" class="text-center">暂无数据</td>
+            <td colspan="4" class="text-center">暂无数据</td>
           </tr>
           <tr v-else v-for="pair in pairs" :key="pair.ctrip_id_1 + pair.ctrip_id_2">
+            <td>{{ pair.user }}</td>
             <td>{{ pair.ctrip_id_1 }}</td>
             <td>{{ pair.ctrip_id_2 }}</td>
             <td>
@@ -257,7 +259,7 @@ export default {
       this.loadingPairs = true;
       try {
         const response = await getPairs();
-        this.pairs = response;
+        this.pairs = response.data || [];
       } catch (err) {
         console.error('获取配对列表失败:', err);
       } finally {
@@ -298,7 +300,7 @@ export default {
       this.loadingMyPairs = true;
       try {
         const response = await getMyPairs();
-        this.myPairs = response;
+        this.myPairs = response.data || [];
       } catch (err) {
         console.error('获取个人配对列表失败:', err);
       } finally {
