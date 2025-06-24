@@ -77,3 +77,62 @@ export const getMyPairs = () => {
 export const deleteMyPair = (data) => {
   return api.delete('/api/pair/my', { data });
 };
+
+// 携程酒店链接校验函数
+export const validateCtripHotelUrl = (url) => {
+  try {
+    // 检查是否是有效的URL
+    const urlObj = new URL(url);
+    
+    // 检查是否是携程酒店域名
+    if (!urlObj.hostname.includes('hotels.ctrip.com')) {
+      return {
+        isValid: false,
+        hotelId: null,
+        error: '不是有效的携程酒店链接'
+      };
+    }
+    
+    // 检查路径是否包含hotels/detail
+    if (!urlObj.pathname.includes('/hotels/detail/')) {
+      return {
+        isValid: false,
+        hotelId: null,
+        error: '不是有效的携程酒店详情页链接'
+      };
+    }
+    
+    // 获取hotelId参数
+    const hotelId = urlObj.searchParams.get('hotelId');
+    
+    if (!hotelId) {
+      return {
+        isValid: false,
+        hotelId: null,
+        error: '链接中缺少hotelId参数'
+      };
+    }
+    
+    // 检查hotelId是否为数字
+    if (!/^\d+$/.test(hotelId)) {
+      return {
+        isValid: false,
+        hotelId: null,
+        error: 'hotelId必须是数字'
+      };
+    }
+    
+    return {
+      isValid: true,
+      hotelId: parseInt(hotelId),
+      error: null
+    };
+    
+  } catch (error) {
+    return {
+      isValid: false,
+      hotelId: null,
+      error: '无效的URL格式'
+    };
+  }
+};

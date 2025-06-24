@@ -1,6 +1,31 @@
 <template>
   <div class="user-info">
     <h2>用户信息</h2>
+    
+    <!-- 测试区域 -->
+    <div class="test-container">
+      <h3>链接校验测试</h3>
+      <div class="test-input">
+        <v-text-field 
+          v-model="testUrl" 
+          label="测试携程酒店链接" 
+          placeholder="请输入携程酒店详情页链接进行测试"
+          density="compact" 
+          class="test-field"
+        ></v-text-field>
+        <v-btn color="secondary" @click="testValidation">测试校验</v-btn>
+        <v-btn color="info" @click="loadTestUrl" variant="outlined">加载测试链接</v-btn>
+      </div>
+      <div v-if="testResult" class="test-result">
+        <div v-if="testResult.isValid" class="success">
+          ✅ 校验通过！HotelId: {{ testResult.hotelId }}
+        </div>
+        <div v-else class="error">
+          ❌ 校验失败：{{ testResult.error }}
+        </div>
+      </div>
+    </div>
+    
     <div v-if="loading">加载中...</div>
     <div v-else-if="error">{{ error }}</div>
     <div v-else class="info-container">
@@ -30,7 +55,14 @@
     <div class="pairs-container">
       <h3>个人配对管理</h3>
       <div class="pairs-actions">
-        <v-text-field v-model="newMyPair.ctrip_id" label="携程ID" density="compact" class="input-field"></v-text-field>
+        <v-text-field 
+          v-model="newMyPair.ctrip_id" 
+          label="携程酒店链接" 
+          placeholder="请输入携程酒店详情页链接"
+          density="compact" 
+          class="input-field"
+          :error-messages="ctripUrlError"
+        ></v-text-field>
         <v-btn color="primary" @click="handleAddMyPair" :loading="addingMyPair">
           添加个人配对
         </v-btn>
@@ -65,8 +97,22 @@
     <div class="pairs-container">
       <h3>配对管理</h3>
       <div class="pairs-actions">
-        <v-text-field v-model="newPair.ctrip_id_1" label="携程ID 1" density="compact" class="input-field"></v-text-field>
-        <v-text-field v-model="newPair.ctrip_id_2" label="携程ID 2" density="compact" class="input-field"></v-text-field>
+        <v-text-field 
+          v-model="newPair.ctrip_id_1" 
+          label="携程酒店链接 1" 
+          placeholder="请输入携程酒店详情页链接"
+          density="compact" 
+          class="input-field"
+          :error-messages="ctripUrlError1"
+        ></v-text-field>
+        <v-text-field 
+          v-model="newPair.ctrip_id_2" 
+          label="携程酒店链接 2" 
+          placeholder="请输入携程酒店详情页链接"
+          density="compact" 
+          class="input-field"
+          :error-messages="ctripUrlError2"
+        ></v-text-field>
         <v-btn color="primary" @click="handleAddPair" :loading="addingPair">
           添加配对
         </v-btn>
@@ -128,7 +174,8 @@ import {
   deletePair,
   addMyPair,
   getMyPairs,
-  deleteMyPair
+  deleteMyPair,
+  validateCtripHotelUrl
 } from '../api/api';
 
 export default {
@@ -162,7 +209,12 @@ export default {
       deletingMyPair: null,
       newMyPair: {
         ctrip_id: ''
-      }
+      },
+      ctripUrlError: '',
+      ctripUrlError1: '',
+      ctripUrlError2: '',
+      testUrl: '',
+      testResult: null
     };
   },
   async created() {
@@ -241,16 +293,42 @@ export default {
     },
     async handleAddPair() {
       if (!this.newPair.ctrip_id_1 || !this.newPair.ctrip_id_2) {
+        if (!this.newPair.ctrip_id_1) this.ctripUrlError1 = '请输入携程酒店链接';
+        if (!this.newPair.ctrip_id_2) this.ctripUrlError2 = '请输入携程酒店链接';
         return;
       }
+      
+      // 校验第一个携程酒店链接
+      const validation1 = validateCtripHotelUrl(this.newPair.ctrip_id_1);
+      if (!validation1.isValid) {
+        this.ctripUrlError1 = validation1.error;
+        return;
+      }
+      
+      // 校验第二个携程酒店链接
+      const validation2 = validateCtripHotelUrl(this.newPair.ctrip_id_2);
+      if (!validation2.isValid) {
+        this.ctripUrlError2 = validation2.error;
+        return;
+      }
+      
+      // 清除错误信息
+      this.ctripUrlError1 = '';
+      this.ctripUrlError2 = '';
+      
       this.addingPair = true;
       try {
-        await addPair(this.newPair);
+        // 使用校验后的hotelId作为ctrip_id
+        await addPair({
+          ctrip_id_1: validation1.hotelId.toString(),
+          ctrip_id_2: validation2.hotelId.toString()
+        });
         await this.fetchPairs();
         this.newPair.ctrip_id_1 = '';
         this.newPair.ctrip_id_2 = '';
       } catch (err) {
         console.error('添加配对失败:', err);
+        this.ctripUrlError1 = '添加失败，请重试';
       } finally {
         this.addingPair = false;
       }
@@ -282,15 +360,32 @@ export default {
     },
     async handleAddMyPair() {
       if (!this.newMyPair.ctrip_id) {
+        this.ctripUrlError = '请输入携程酒店链接';
         return;
       }
+      
+      // 校验携程酒店链接
+      const validation = validateCtripHotelUrl(this.newMyPair.ctrip_id);
+      
+      if (!validation.isValid) {
+        this.ctripUrlError = validation.error;
+        return;
+      }
+      
+      // 清除错误信息
+      this.ctripUrlError = '';
+      
       this.addingMyPair = true;
       try {
-        await addMyPair(this.newMyPair);
+        // 使用校验后的hotelId作为ctrip_id
+        await addMyPair({
+          ctrip_id: validation.hotelId.toString()
+        });
         await this.fetchMyPairs();
         this.newMyPair.ctrip_id = '';
       } catch (err) {
         console.error('添加个人配对失败:', err);
+        this.ctripUrlError = '添加失败，请重试';
       } finally {
         this.addingMyPair = false;
       }
@@ -307,6 +402,21 @@ export default {
       } finally {
         this.deletingMyPair = null;
       }
+    },
+    testValidation() {
+      try {
+        const result = validateCtripHotelUrl(this.testUrl);
+        this.testResult = result;
+      } catch (err) {
+        console.error('校验失败:', err);
+        this.testResult = {
+          isValid: false,
+          error: '校验失败，请检查链接'
+        };
+      }
+    },
+    loadTestUrl() {
+      this.testUrl = 'https://hotels.ctrip.com/hotels/detail/?cityId=30&checkin=2025-06-24&checkout=2025-07-24&hotelId=3456464&adult=1&crn=1&children=0&highprice=-1&lowprice=0&listfilter=1&checkin=2025-06-24&checkout=2025-07-24';
     }
   }
 };
@@ -415,7 +525,7 @@ export default {
 }
 
 .input-field {
-  max-width: 200px;
+  max-width: 300px;
 }
 
 :deep(.v-table) {
@@ -435,5 +545,39 @@ export default {
 
 .text-center {
   text-align: center;
+}
+
+.test-container {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.test-input {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.test-field {
+  max-width: 300px;
+}
+
+.test-result {
+  margin-top: 10px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.success {
+  color: #4caf50;
+}
+
+.error {
+  color: #f44336;
 }
 </style>
