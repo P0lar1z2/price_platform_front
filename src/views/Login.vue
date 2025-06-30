@@ -18,6 +18,11 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value
     })
+    
+    // 存储用户权限信息到localStorage
+    localStorage.setItem('userRole', JSON.stringify(response.role))
+    localStorage.setItem('userToken', response.token)
+    
     router.push('/')
   } catch (err) {
     error.value = err.response?.status === 401 ? "错误的用户名或密码" : "登陆失败"

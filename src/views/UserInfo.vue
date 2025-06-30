@@ -83,34 +83,44 @@
     </div>
     <!-- 配对管理 -->
     <div class="pairs-container">
-      <h3>配对管理</h3>
+      <h3>配对策略</h3>
       <div class="pairs-actions">
-        <v-text-field v-model="newPair.ctrip_id_1" label="携程酒店链接 1" placeholder="请输入携程酒店详情页链接" density="compact"
-          class="input-field" :error-messages="ctripUrlError1"></v-text-field>
-        <v-text-field v-model="newPair.ctrip_id_2" label="携程酒店链接 2" placeholder="请输入携程酒店详情页链接" density="compact"
-          class="input-field" :error-messages="ctripUrlError2"></v-text-field>
+        <v-text-field v-model="newPair.ctrip_id_1" label="目标" placeholder="对方页面链接" density="compact"
+          class="input-field" :error-messages="ctripUrlError1" hide-details="auto"></v-text-field>
+        <v-text-field v-model="newPair.ctrip_id_2" label="动态" placeholder="我方页面链接" density="compact"
+          class="input-field" :error-messages="ctripUrlError2" hide-details="auto"></v-text-field>
+        <v-text-field v-model="newPair.bias" label="价格偏差 bias" placeholder="bias（整数）" density="compact"
+          class="input-field bias-input" type="number" :error-messages="biasError" hide-details="auto"></v-text-field>
         <v-btn color="primary" @click="handleAddPair" :loading="addingPair">
           添加配对
         </v-btn>
       </div>
+      <div style="color: #888; font-size: 13px; margin-bottom: 10px;">
+        说明：
+        <br>1. "目标"请填写对方的酒店ID 链接；
+        <br>2. "动态"请填写我们自己的酒店ID 链接；
+        <br>3. bias = "对方酒店价格" - "我们酒店价格"，请填写整数。
+      </div>
       <v-table>
         <thead>
           <tr>
-            <th>携程ID 1</th>
-            <th>携程ID 2</th>
+            <th>目标酒店ID</th>
+            <th>动态酒店ID</th>
+            <th>bias</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loadingPairs">
-            <td colspan="3" class="text-center">加载中...</td>
+            <td colspan="4" class="text-center">加载中...</td>
           </tr>
           <tr v-else-if="pairs.length === 0">
-            <td colspan="3" class="text-center">暂无数据</td>
+            <td colspan="4" class="text-center">暂无数据</td>
           </tr>
           <tr v-else v-for="pair in pairs" :key="pair.ctrip_id_1 + pair.ctrip_id_2">
             <td>{{ pair.ctrip_id_1 }}</td>
             <td>{{ pair.ctrip_id_2 }}</td>
+            <td>{{ pair.bias }}</td>
             <td>
               <v-btn color="error" size="small" variant="text" @click="handleDeletePair(pair)"
                 :loading="deletingPair === pair.ctrip_id_1 + pair.ctrip_id_2">
@@ -142,7 +152,6 @@
 
 <script>
 import {
-  getUserInfo,
   getCtripState,
   getCtripQrcode,
   addPair,
@@ -176,7 +185,8 @@ export default {
       deletingPair: null,
       newPair: {
         ctrip_id_1: '',
-        ctrip_id_2: ''
+        ctrip_id_2: '',
+        bias: ''
       },
       // 个人配对管理
       myPairs: [],
@@ -190,11 +200,12 @@ export default {
       ctripUrlError1: '',
       ctripUrlError2: '',
       testUrl: '',
-      testResult: null
+      testResult: null,
+      biasError: ''
     };
   },
   async created() {
-    await this.fetchUserInfo();
+    this.fetchUserInfo();
     await this.fetchCtripState();
     await this.fetchPairs();
     await this.fetchMyPairs();
@@ -207,11 +218,16 @@ export default {
     }
   },
   methods: {
-    async fetchUserInfo() {
+    fetchUserInfo() {
       this.loading = true;
       try {
-        const response = await getUserInfo();
-        this.userInfo = response;
+        const userRoleStr = localStorage.getItem('userRole');
+        if (userRoleStr) {
+          const userRole = JSON.parse(userRoleStr);
+          this.userInfo = userRole;
+        } else {
+          this.error = '获取用户信息失败';
+        }
       } catch (err) {
         this.error = '获取用户信息失败';
       } finally {
@@ -269,39 +285,43 @@ export default {
     },
     async handleAddPair() {
       if (!this.newPair.ctrip_id_1 || !this.newPair.ctrip_id_2) {
-        if (!this.newPair.ctrip_id_1) this.ctripUrlError1 = '请输入携程酒店链接';
-        if (!this.newPair.ctrip_id_2) this.ctripUrlError2 = '请输入携程酒店链接';
+        if (!this.newPair.ctrip_id_1) this.ctripUrlError1 = '请输入对方的携程酒店链接';
+        if (!this.newPair.ctrip_id_2) this.ctripUrlError2 = '请输入我们的携程酒店链接';
         return;
       }
-
+      // 校验 bias
+      if (this.newPair.bias === '' || isNaN(this.newPair.bias) || !Number.isInteger(Number(this.newPair.bias))) {
+        this.biasError = '请输入整数类型的 bias';
+        return;
+      }
+      this.biasError = '';
       // 校验第一个携程酒店链接
       const validation1 = validateCtripHotelUrl(this.newPair.ctrip_id_1);
       if (!validation1.isValid) {
         this.ctripUrlError1 = validation1.error;
         return;
       }
-
       // 校验第二个携程酒店链接
       const validation2 = validateCtripHotelUrl(this.newPair.ctrip_id_2);
       if (!validation2.isValid) {
         this.ctripUrlError2 = validation2.error;
         return;
       }
-
       // 清除错误信息
       this.ctripUrlError1 = '';
       this.ctripUrlError2 = '';
-
       this.addingPair = true;
       try {
         // 使用校验后的hotelId作为ctrip_id
         await addPair({
           ctrip_id_1: validation1.hotelId.toString(),
-          ctrip_id_2: validation2.hotelId.toString()
+          ctrip_id_2: validation2.hotelId.toString(),
+          bias: Number(this.newPair.bias)
         });
         await this.fetchPairs();
         this.newPair.ctrip_id_1 = '';
         this.newPair.ctrip_id_2 = '';
+        this.newPair.bias = '';
       } catch (err) {
         console.error('添加配对失败:', err);
         this.ctripUrlError1 = '添加失败，请重试';
@@ -500,6 +520,10 @@ export default {
 
 .input-field {
   max-width: 300px;
+}
+
+.bias-input {
+  max-width: 120px;
 }
 
 :deep(.v-table) {

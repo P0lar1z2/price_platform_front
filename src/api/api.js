@@ -40,7 +40,7 @@ export const logout = () => {
   return api.post("/api/logout");
 };
 
-export const getUserInfo = () => {
+export const getEndpointState = () => {
   return api.get("/api/endpoint/state");
 };
 
@@ -135,4 +135,9 @@ export const validateCtripHotelUrl = (url) => {
       error: '无效的URL格式'
     };
   }
+};
+
+// 获取酒店可用性数据
+export const getHotelAvailability = (hotelId) => {
+  return api.get(`/api/ctrip/hotel/${hotelId}/availability`);
 };
