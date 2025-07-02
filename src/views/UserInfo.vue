@@ -84,20 +84,24 @@
     <!-- 配对管理 -->
     <div class="pairs-container">
       <h3>配对策略</h3>
-      <div class="pairs-actions">
-        <v-text-field v-model="newPair.ctrip_id_1" label="目标" placeholder="对方页面链接" density="compact"
-          class="input-field" :error-messages="ctripUrlError1" hide-details="auto"></v-text-field>
-        <v-text-field v-model="newPair.ctrip_id_2" label="动态" placeholder="我方页面链接" density="compact"
-          class="input-field" :error-messages="ctripUrlError2" hide-details="auto"></v-text-field>
-        <v-text-field v-model="newPair.target_room_type" label="目标酒店房型" placeholder="对方房型" density="compact"
-          class="input-field" hide-details="auto"></v-text-field>
-        <v-text-field v-model="newPair.dynamic_room_type" label="动态酒店房型" placeholder="我方房型" density="compact"
-          class="input-field" hide-details="auto"></v-text-field>
-        <v-text-field v-model="newPair.bias" label="价格偏差 bias" placeholder="bias（整数）" density="compact"
-          class="input-field bias-input" type="number" :error-messages="biasError" hide-details="auto"></v-text-field>
-        <v-btn color="primary" @click="handleAddPair" :loading="addingPair">
-          添加配对
-        </v-btn>
+      <div class="pairs-actions pairs-actions-multiline">
+        <div class="input-row">
+          <v-text-field v-model="newPair.ctrip_id_1" label="目标" placeholder="对方页面链接" density="compact"
+            class="input-field" :error-messages="ctripUrlError1" hide-details="auto"></v-text-field>
+          <v-text-field v-model="newPair.target_room_type" label="目标酒店房型" placeholder="对方房型" density="compact"
+            class="input-field" hide-details="auto"></v-text-field>
+        </div>
+        <div class="input-row">
+          <v-text-field v-model="newPair.ctrip_id_2" label="动态" placeholder="我方页面链接" density="compact"
+            class="input-field" :error-messages="ctripUrlError2" hide-details="auto"></v-text-field>
+          <v-text-field v-model="newPair.dynamic_room_type" label="动态酒店房型" placeholder="我方房型" density="compact"
+            class="input-field" hide-details="auto"></v-text-field>
+          <v-text-field v-model="newPair.bias" label="价格偏差 bias" placeholder="bias（整数）" density="compact"
+            class="input-field bias-input" type="number" :error-messages="biasError" hide-details="auto"></v-text-field>
+          <v-btn color="primary" @click="handleAddPair" :loading="addingPair">
+            添加配对
+          </v-btn>
+        </div>
       </div>
       <div style="color: #888; font-size: 13px; margin-bottom: 10px;">
         说明：
@@ -590,5 +594,21 @@ export default {
 
 .error {
   color: #f44336;
+}
+
+.pairs-actions-multiline {
+  flex-direction: column;
+  gap: 8px;
+}
+.input-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.input-row .input-field {
+  flex: 1;
+  min-width: 180px;
+  max-width: 260px;
 }
 </style>
