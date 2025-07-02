@@ -54,10 +54,12 @@ export const getCtripQrcode = () => {
 
 // 配对管理接口
 export const addPair = (data) => {
+  // data 需包含 target_room_type 和 dynamic_room_type 字段
   return api.post('/api/pair', data);
 };
 
 export const getPairs = () => {
+  // 返回的每个pair对象需包含 target_room_type 和 dynamic_room_type 字段
   return api.get('/api/pair');
 };
 

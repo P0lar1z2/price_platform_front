@@ -89,6 +89,10 @@
           class="input-field" :error-messages="ctripUrlError1" hide-details="auto"></v-text-field>
         <v-text-field v-model="newPair.ctrip_id_2" label="动态" placeholder="我方页面链接" density="compact"
           class="input-field" :error-messages="ctripUrlError2" hide-details="auto"></v-text-field>
+        <v-text-field v-model="newPair.target_room_type" label="目标酒店房型" placeholder="对方房型" density="compact"
+          class="input-field" hide-details="auto"></v-text-field>
+        <v-text-field v-model="newPair.dynamic_room_type" label="动态酒店房型" placeholder="我方房型" density="compact"
+          class="input-field" hide-details="auto"></v-text-field>
         <v-text-field v-model="newPair.bias" label="价格偏差 bias" placeholder="bias（整数）" density="compact"
           class="input-field bias-input" type="number" :error-messages="biasError" hide-details="auto"></v-text-field>
         <v-btn color="primary" @click="handleAddPair" :loading="addingPair">
@@ -105,21 +109,25 @@
         <thead>
           <tr>
             <th>目标酒店ID</th>
+            <th>目标酒店房型</th>
             <th>动态酒店ID</th>
+            <th>动态酒店房型</th>
             <th>bias</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="loadingPairs">
-            <td colspan="4" class="text-center">加载中...</td>
+            <td colspan="6" class="text-center">加载中...</td>
           </tr>
           <tr v-else-if="pairs.length === 0">
-            <td colspan="4" class="text-center">暂无数据</td>
+            <td colspan="6" class="text-center">暂无数据</td>
           </tr>
-          <tr v-else v-for="pair in pairs" :key="pair.ctrip_id_1 + pair.ctrip_id_2">
+          <tr v-else v-for="pair in pairs" :key="pair.ctrip_id_1 + pair.ctrip_id_2 + (pair.target_room_type || '') + (pair.dynamic_room_type || '')">
             <td>{{ pair.ctrip_id_1 }}</td>
+            <td>{{ pair.target_room_type }}</td>
             <td>{{ pair.ctrip_id_2 }}</td>
+            <td>{{ pair.dynamic_room_type }}</td>
             <td>{{ pair.bias }}</td>
             <td>
               <v-btn color="error" size="small" variant="text" @click="handleDeletePair(pair)"
@@ -186,7 +194,9 @@ export default {
       newPair: {
         ctrip_id_1: '',
         ctrip_id_2: '',
-        bias: ''
+        bias: '',
+        target_room_type: '',
+        dynamic_room_type: ''
       },
       // 个人配对管理
       myPairs: [],
@@ -312,16 +322,19 @@ export default {
       this.ctripUrlError2 = '';
       this.addingPair = true;
       try {
-        // 使用校验后的hotelId作为ctrip_id
         await addPair({
           ctrip_id_1: validation1.hotelId.toString(),
           ctrip_id_2: validation2.hotelId.toString(),
-          bias: Number(this.newPair.bias)
+          bias: Number(this.newPair.bias),
+          target_room_type: this.newPair.target_room_type,
+          dynamic_room_type: this.newPair.dynamic_room_type
         });
         await this.fetchPairs();
         this.newPair.ctrip_id_1 = '';
         this.newPair.ctrip_id_2 = '';
         this.newPair.bias = '';
+        this.newPair.target_room_type = '';
+        this.newPair.dynamic_room_type = '';
       } catch (err) {
         console.error('添加配对失败:', err);
         this.ctripUrlError1 = '添加失败，请重试';
