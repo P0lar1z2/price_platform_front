@@ -4,7 +4,7 @@ const feishuConfig = {
   backendApi: {
     baseUrl:
       process.env.NODE_ENV === "production"
-        ? "https://www.edfgaad.xyz/"
+        ? "https://www.edfgaad.xyz"
         : "http://127.0.0.1:8001",
     loginUrl: "/api/feishu/login",
     callbackUrl: "/api/feishu/callback",
