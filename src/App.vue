@@ -1,32 +1,25 @@
 <template>
   <v-app>
     <v-main>
-      <div class="startup-container">
-        <!-- 成功图标和标题 -->
-        <div class="success-header">
-          <v-icon class="success-icon">mdi-check-circle</v-icon>
-          <div class="success-title">安装成功！</div>
-          <div class="success-subtitle">
-            {{ extensionInfo.name }}已成功安装并启动
-          </div>
+      <div class="login-container">
+        <!-- 登录标题 -->
+        <div class="login-header">
+          <v-icon class="login-icon">mdi-account-circle</v-icon>
+          <div class="login-title">飞书登录</div>
+          <div class="login-subtitle">请使用飞书扫描二维码完成登录</div>
         </div>
 
         <!-- 飞书登录卡片 -->
-        <v-card class="info-card" elevation="2" v-if="!isLoggedIn">
-          <v-card-title class="text-h6 pa-4 pb-2">
-            <v-icon class="mr-2">mdi-account-circle</v-icon>
-            飞书登录
-          </v-card-title>
-
-          <v-card-text class="pa-4 pt-0">
+        <v-card class="login-card" elevation="2">
+          <v-card-text class="pa-6">
             <div class="qr-login-container">
               <div v-if="qrCodeLoading" class="text-center py-4">
                 <v-progress-circular
                   indeterminate
                   color="primary"
-                  size="24"
+                  size="32"
                 ></v-progress-circular>
-                <div class="mt-2">正在加载二维码...</div>
+                <div class="mt-3 text-body-1">正在加载二维码...</div>
               </div>
 
               <div class="qr-code-wrapper">
@@ -37,7 +30,7 @@
                 ></div>
               </div>
               <div class="qr-instructions" v-if="!qrCodeLoading">
-                <p class="text-center text-body-2 text-grey-darken-1">
+                <p class="text-center text-body-1">
                   请使用飞书扫描二维码登录
                 </p>
               </div>
@@ -45,113 +38,9 @@
           </v-card-text>
         </v-card>
 
-        <!-- 用户信息卡片 (登录后显示) -->
-        <v-card class="info-card" elevation="2" v-if="isLoggedIn">
-          <v-card-title class="text-h6 pa-4 pb-2">
-            <v-icon class="mr-2">mdi-account-check</v-icon>
-            用户信息
-          </v-card-title>
 
-          <v-card-text class="pa-4 pt-0">
-            <div class="status-item">
-              <span class="status-label">登录状态:</span>
-              <v-chip color="success" size="small">
-                <v-icon start>mdi-check</v-icon>
-                已登录
-              </v-chip>
-            </div>
-            <div class="status-item" v-if="userInfo.name">
-              <span class="status-label">用户名:</span>
-              <span>{{ userInfo.name }}</span>
-            </div>
-            <div class="status-item" v-if="userInfo.email">
-              <span class="status-label">邮箱:</span>
-              <span>{{ userInfo.email }}</span>
-            </div>
-          </v-card-text>
-        </v-card>
 
-        <!-- 扩展信息卡片 -->
-        <v-card class="info-card" elevation="2">
-          <v-card-title class="text-h6 pa-4 pb-2">
-            <v-icon class="mr-2">mdi-information</v-icon>
-            扩展信息
-          </v-card-title>
 
-          <v-card-text class="pa-4 pt-0">
-            <div v-if="loading" class="text-center py-4">
-              <v-progress-circular
-                indeterminate
-                color="primary"
-                size="24"
-              ></v-progress-circular>
-              <div class="mt-2">正在加载...</div>
-            </div>
-
-            <div v-else>
-              <div class="status-item">
-                <span class="status-label">扩展名称:</span>
-                <span>{{ extensionInfo.name }}</span>
-              </div>
-              <div class="status-item">
-                <span class="status-label">版本:</span>
-                <span>{{ extensionInfo.version }}</span>
-              </div>
-              <div class="status-item">
-                <span class="status-label">状态:</span>
-                <v-chip color="success" size="small">
-                  <v-icon start>mdi-check</v-icon>
-                  运行中
-                </v-chip>
-              </div>
-            </div>
-          </v-card-text>
-        </v-card>
-
-        <!-- 操作按钮 -->
-        <v-card class="info-card" elevation="2">
-          <v-card-title class="text-h6 pa-4 pb-2">
-            <v-icon class="mr-2">mdi-rocket-launch</v-icon>
-            开始使用
-          </v-card-title>
-
-          <v-card-text class="pa-4 pt-0">
-            <div class="action-buttons">
-              <v-btn
-                color="primary"
-                @click="openPopup"
-                prepend-icon="mdi-window-maximize"
-                block
-              >
-                打开控制面板
-              </v-btn>
-            </div>
-
-            <div class="action-buttons" v-if="isLoggedIn">
-              <v-btn
-                color="warning"
-                @click="logout"
-                prepend-icon="mdi-logout"
-                variant="outlined"
-                block
-              >
-                退出登录
-              </v-btn>
-            </div>
-
-            <div class="action-buttons">
-              <v-btn
-                color="success"
-                @click="closeStartupPage"
-                prepend-icon="mdi-close"
-                variant="outlined"
-                block
-              >
-                关闭此页面
-              </v-btn>
-            </div>
-          </v-card-text>
-        </v-card>
 
         <!-- 状态提示 -->
         <v-snackbar
@@ -174,42 +63,28 @@
 import feishuConfig from "../config/feishu.js";
 
 export default {
-  name: "StartupApp",
+  name: "LoginApp",
   data() {
     return {
-      loading: true,
       qrCodeLoading: true,
-      isLoggedIn: false,
-      userInfo: {
-        name: "",
-        email: "",
-        accessToken: "",
-      },
-      extensionInfo: {
-        name: "OTA 监控扩展",
-        version: "1.0.0",
-      },
       showStatus: false,
       statusMessage: "",
       statusType: "success",
+      // URL参数
+      uuid: "",
       // 飞书配置
       feishuState: feishuConfig.generateState(),
       qrLoginObj: null,
     };
   },
   async mounted() {
-    await this.loadExtensionInfo();
-    await this.checkLoginStatus();
+    // 解析URL参数
+    this.parseUrlParams();
 
-    // 检查URL参数，看是否有登录成功的标识
-    this.checkLoginCallback();
-
-    if (!this.isLoggedIn) {
-      // 使用 nextTick 确保DOM完全渲染后再初始化二维码
-      this.$nextTick(async () => {
-        await this.initFeishuQRLogin();
-      });
-    }
+    // 初始化二维码
+    this.$nextTick(async () => {
+      await this.initFeishuQRLogin();
+    });
   },
   beforeUnmount() {
     // 清理事件监听器
@@ -218,30 +93,24 @@ export default {
     }
   },
   methods: {
-    // 加载扩展信息
-    async loadExtensionInfo() {
-      try {
-        // 检查Chrome API是否可用
-        if (
-          typeof chrome !== "undefined" &&
-          chrome.runtime &&
-          chrome.runtime.getManifest
-        ) {
-          const manifest = chrome.runtime.getManifest();
-          if (manifest && manifest.name) {
-            this.extensionInfo = {
-              name: manifest.name,
-              version: manifest.version || "1.0.0",
-            };
-            console.log("扩展信息加载成功:", this.extensionInfo);
-          }
-        }
-      } catch (error) {
-        console.error("加载扩展信息失败:", error);
-        // 保持默认值
-        console.log("使用默认扩展信息:", this.extensionInfo);
-      } finally {
-        this.loading = false;
+    // 解析URL参数
+    parseUrlParams() {
+      console.log('🔍 开始解析URL参数...');
+      console.log('📍 当前URL:', window.location.href);
+      console.log('🔗 查询字符串:', window.location.search);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      this.uuid = urlParams.get('uuid') || '';
+
+      console.log('📥 解析结果:', {
+        uuid: this.uuid
+      });
+
+      if (!this.uuid) {
+        console.warn('⚠️ 缺少UUID参数');
+        this.showStatusMessage('缺少必要的UUID参数', 'error');
+      } else {
+        console.log('✅ UUID参数正常:', this.uuid);
       }
     },
 
@@ -318,8 +187,8 @@ export default {
         // 等待SDK加载
         await this.waitForFeishuSDK();
 
-        // 构建授权URL
-        const gotoUrl = feishuConfig.buildAuthUrl(this.feishuState);
+        // 构建授权URL，只传递uuid参数
+        const gotoUrl = feishuConfig.buildAuthUrl(this.feishuState, this.uuid);
         console.log("授权URL:", gotoUrl);
 
         // 检查必要参数
@@ -423,7 +292,7 @@ export default {
           console.log("获取到临时授权码:", loginTmpCode);
 
           // 构建完整的授权URL
-          const gotoUrl = feishuConfig.buildAuthUrl(this.feishuState);
+          const gotoUrl = feishuConfig.buildAuthUrl(this.feishuState, this.uuid);
           const finalUrl = `${gotoUrl}&tmp_code=${loginTmpCode}`;
 
           console.log("跳转到授权页面:", finalUrl);
@@ -509,42 +378,43 @@ export default {
 </script>
 
 <style>
-.startup-container {
-  max-width: 500px;
+.login-container {
+  max-width: 450px;
   margin: 0 auto;
-  padding: 20px 24px;
+  padding: 40px 24px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding-top: 40px;
+  justify-content: center;
 }
 
-.success-header {
+.login-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
-.success-icon {
-  font-size: 64px;
-  color: #4caf50;
-  margin-bottom: 16px;
-}
-
-.success-title {
-  font-size: 24px;
-  font-weight: 500;
+.login-icon {
+  font-size: 72px;
   color: #1976d2;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
 }
 
-.success-subtitle {
+.login-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1976d2;
+  margin-bottom: 12px;
+}
+
+.login-subtitle {
   font-size: 16px;
   color: #666;
+  line-height: 1.5;
 }
 
-.info-card {
-  margin-bottom: 24px;
+.login-card {
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 .action-buttons {
@@ -586,7 +456,6 @@ export default {
   padding: 16px;
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 1px solid #e8e8e8;
 }
 
@@ -613,13 +482,11 @@ export default {
   color: #555;
   font-weight: 500;
   font-size: 14px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /* 二维码iframe美化 */
 #feishu_qr_login iframe {
   border-radius: 8px !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* 确保应用背景 */
@@ -643,10 +510,26 @@ export default {
 
 /* 响应式调整 */
 @media (max-width: 480px) {
-  .startup-container {
+  .login-container {
     padding: 20px 16px;
-    padding-top: 20px;
+    justify-content: flex-start;
+    padding-top: 40px;
   }
+
+  .login-header {
+    margin-bottom: 30px;
+  }
+
+  .login-icon {
+    font-size: 60px;
+    margin-bottom: 16px;
+  }
+
+  .login-title {
+    font-size: 24px;
+  }
+
+
 
   .qr-code-wrapper {
     padding: 12px;
@@ -655,16 +538,6 @@ export default {
 
   .qr-login-container {
     padding: 16px 0;
-  }
-
-
-
-  .success-header {
-    margin-bottom: 20px;
-  }
-
-  .info-card {
-    margin-bottom: 16px;
   }
 }
 </style>

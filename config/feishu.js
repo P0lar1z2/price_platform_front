@@ -38,17 +38,41 @@ const feishuConfig = {
   },
 
   // 构建授权URL（用于二维码生成）
-  buildAuthUrl(state) {
+  buildAuthUrl(state, uuid = '') {
+    console.log('🔧 开始构建授权URL...');
+    console.log('📥 输入参数:', { state, uuid });
+
     // 这里返回后端提供的授权URL，或者使用默认的飞书授权地址
     const authUrl = "https://passport.feishu.cn/suite/passport/oauth/authorize";
+
+    // 构建回调URL，只拼接uuid参数
+    let callbackUrl = `${this.backendApi.baseUrl}${this.backendApi.callbackUrl}`;
+    console.log('🏠 基础回调URL:', callbackUrl);
+
+    if (uuid) {
+      callbackUrl += `?uuid=${encodeURIComponent(uuid)}`;
+      console.log('🆔 添加UUID后:', callbackUrl);
+    }
+
+    console.log('✅ 最终回调URL:', callbackUrl);
+
     const params = new URLSearchParams({
       client_id: this.appId,
-      redirect_uri: `${this.backendApi.baseUrl}${this.backendApi.callbackUrl}`,
+      redirect_uri: callbackUrl,
       response_type: "code",
       state: state,
     });
 
-    return `${authUrl}?${params.toString()}`;
+    const finalAuthUrl = `${authUrl}?${params.toString()}`;
+    console.log('🎯 最终授权URL:', finalAuthUrl);
+    console.log('📋 URL参数详情:', {
+      client_id: this.appId,
+      redirect_uri: callbackUrl,
+      response_type: "code",
+      state: state
+    });
+
+    return finalAuthUrl;
   },
 
   // 调用后端登录接口
